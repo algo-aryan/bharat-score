@@ -7,6 +7,92 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Arial',sans-serif; }
+        body { background:linear-gradient(135deg,#1e3c72,#2a5298); color:#333; line-height:1.6; min-height:100vh; }
+        .header{background:#fff; padding:15px 0; box-shadow:0 2px 10px rgba(0,0,0,0.1); border-bottom:3px solid #ff6b35;}
+        .header-content{max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:0 20px;}
+        .logo img{width:60px; height:60px; border-radius:8px;}
+        .logo-text h1{color:#1e3c72; font-size:1.5rem; font-weight:bold;}
+        .logo-text p{color:#ff6b35; font-size:0.9rem; font-weight:600;}
+        .user-info{display:flex; align-items:center; gap:15px; color:#1e3c72;}
+        .container{max-width:1200px; margin:0 auto; padding:30px 20px;}
+        .card{background:rgba(255,255,255,0.95); border-radius:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); padding:30px; margin-bottom:25px; border-left:5px solid #ff6b35;}
+        .card h2{color:#1e3c72; margin-bottom:25px; padding-bottom:15px; border-bottom:2px solid #ff6b35; display:flex; align-items:center; font-size:1.4rem;}
+        .card h2 i{margin-right:12px; color:#ff6b35;}
+        .form-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:25px;}
+        .form-group{display:flex; flex-direction:column;}
+        .form-group label{color:#1e3c72; font-weight:600; margin-bottom:8px; font-size:0.95rem;}
+        .form-group input,.form-group select{padding:12px 15px; border:2px solid #e0e0e0; border-radius:8px; font-size:1rem; transition:all .3s;}
+        .form-group input:focus,.form-group select:focus{outline:none; border-color:#ff6b35; box-shadow:0 0 0 3px rgba(255,107,53,0.1);}
+        .form-section{background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px; border-left:4px solid #1e3c72;}
+        .form-section h3{color:#1e3c72; margin-bottom:15px; font-size:1.1rem;}
+        .note{background:#e3f2fd; padding:15px; border-radius:8px; border-left:4px solid #2196f3; color:#1976d2; font-size:0.9rem; margin-bottom:20px;}
+        .note i{margin-right:8px;}
+        .btn{background:linear-gradient(135deg,#ff6b35,#f7931e); color:#fff; border:none; padding:15px 30px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:1.1rem; transition:all .3s; display:flex; align-items:center; justify-content:center; gap:10px; margin:20px auto; min-width:200px;}
+        .btn:hover{transform:translateY(-2px); box-shadow:0 5px 15px rgba(255,107,53,0.3);}
+        .loading-overlay{position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(30,60,114,0.9); display:none; justify-content:center; align-items:center; z-index:1000;}
+        .loading-content{background:#fff; padding:40px; border-radius:15px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        .loading-spinner{width:50px; height:50px; border:5px solid #e0e0e0; border-top:5px solid #ff6b35; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 20px;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        .loading-text{color:#1e3c72; font-size:1.1rem; font-weight:600;}
+        .loading-steps{margin-top:20px; text-align:left; color:#666;}
+        .loading-step{padding:5px 0; opacity:.5; transition:opacity .3s;}
+        .loading-step.active{opacity:1; color:#ff6b35; font-weight:600;}
+        .loading-step i{margin-right:8px;}
+        .results-section{display:none;}
+        .data-fetched-section{background:#e8f5e8; padding:20px; border-radius:12px; margin:20px 0; border-left:4px solid #4caf50;}
+        .data-fetched-section h3{color:#2e7d32; margin-bottom:15px; display:flex; align-items:center;}
+        .data-fetched-section h3 i{margin-right:10px;}
+        .data-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-top:15px;}
+        .data-item{background:#fff; padding:15px; border-radius:8px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .data-item-label{font-size:0.85rem; color:#666; margin-bottom:8px;}
+        .data-item-value{font-size:1.5rem; font-weight:bold; color:#2e7d32;}
+        .score-display{display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:20px; margin-bottom:30px;}
+        .score-card{background:linear-gradient(135deg,#1e3c72,#2a5298); color:#fff; padding:30px; border-radius:15px; text-align:center; min-width:280px; box-shadow:0 8px 25px rgba(0,0,0,0.2); position:relative; overflow:hidden;}
+        .score-card::before{content:''; position:absolute; top:0; left:0; right:0; height:4px; background:#ff6b35;}
+        .score-value{font-size:3.5rem; font-weight:bold; margin:15px 0; text-shadow:0 2px 4px rgba(0,0,0,0.3);}
+        .score-label{font-size:1.1rem; opacity:.9; text-transform:uppercase; letter-spacing:1px;}
+        .score-sublabel{font-size:0.9rem; opacity:.7; margin-top:5px;}
+        .score-excellent{color:#2ecc71;} .score-good{color:#f39c12;} .score-fair{color:#e67e22;} .score-poor{color:#e74c3c;}
+        .components-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:30px;}
+        .component-card{background:#fff; padding:25px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); border-left:4px solid #ff6b35; text-align:center;}
+        .component-card h4{color:#1e3c72; margin-bottom:15px; font-size:1rem;}
+        .component-value{font-size:2.2rem; font-weight:bold; color:#ff6b35; margin:10px 0;}
+        .progress-bar{height:8px; background:#e0e0e0; border-radius:4px; overflow:hidden; margin-top:10px;}
+        .progress{height:100%; background:linear-gradient(90deg,#ff6b35,#f7931e); border-radius:4px; transition:width .8s;}
+        .risk-factors{background:linear-gradient(135deg,#fff3e0,#ffe0b2); border:1px solid #ff6b35; padding:25px; border-radius:12px; margin-bottom:20px;}
+        .risk-factors h3{color:#1e3c72; margin-bottom:15px; display:flex; align-items:center;}
+        .risk-factors h3 i{margin-right:10px; color:#ff6b35;}
+        .risk-list{list-style:none; padding:0;}
+        .risk-item{background:#fff; padding:12px 15px; margin-bottom:10px; border-radius:8px; border-left:4px solid #ff6b35; font-weight:500;}
+        .charts-section{display:grid; grid-template-columns:1fr 1fr; gap:25px; margin-top:25px;}
+        @media(max-width:768px){.charts-section{grid-template-columns:1fr}.score-display{flex-direction:column}}
+        .chart-container{background:#fff; padding:25px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+        .chart-container h3{color:#1e3c72; margin-bottom:20px; display:flex; align-items:center;}
+        .chart-container h3 i{margin-right:10px; color:#ff6b35;}
+        .recommendation{background:linear-gradient(135deg,#e8f5e8,#c8e6c9); border:1px solid #4caf50; padding:25px; border-radius:12px; margin-top:20px;}
+        .recommendation h3{color:#2e7d32; margin-bottom:15px; display:flex; align-items:center;}
+        .recommendation h3 i{margin-right:10px;}
+        .footer{background:#1e3c72; color:#fff; text-align:center; padding:20px 0; margin-top:40px;}
+    
+        /* Chatbot Icon */
+        #chatbot { position:fixed; bottom:20px; right:20px; background:#ff6b35; color:#fff; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:1001; }
+        #chatbot:hover{background:#e65a2c;}
+    
+        /* Chatbot Dialog */
+        #chatbot-dialog { display:none; position:fixed; bottom:90px; right:20px; width:320px; max-height:400px; background:#fff; border-radius:8px; box-shadow:0 8px 25px rgba(0,0,0,0.2); overflow:hidden; flex-direction:column; z-index:1002; }
+        #chatbot-header { background:#ff6b35; color:#fff; padding:10px; display:flex; align-items:center; justify-content:space-between; }
+        #chatbot-header i{cursor:pointer;}
+        #chatbot-body { flex:1; padding:10px; display:flex; flex-direction:column; overflow-y:auto; background:#f8fafc; }
+        .chat-msg { margin:5px 0; padding:8px 12px; border-radius:12px; max-width:80%; }
+        .bot-msg{background:#e2e8f0; align-self:flex-start;}
+        .user-msg{background:#ff6b35; color:#fff; align-self:flex-end;}
+        #chatbot-input-container{ display:flex; padding:10px; border-top:1px solid #ddd; }
+        #chatbot-input { flex:1; padding:8px 10px; border:1px solid #ccc; border-radius:4px; }
+        #chatbot-send{ background:#ff6b35; color:#fff; border:none; padding:8px 12px; margin-left:8px; border-radius:4px; cursor:pointer; }
+    
+      </style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -200,6 +286,29 @@
             align-items: center;
             z-index: 1000;
         }
+
+        /* Chatbot styles */
+#chatbot {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ff6b35;
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 1001;
+}
+#chatbot:hover {
+  background: #e65a2c;
+}
+
         
         .loading-content {
             background: white;
@@ -728,6 +837,62 @@
         <p>© 2025 FINSHIELD Initiative | Empowering Rural India Through Financial Inclusion</p>
     </div>
 
+    <!-- Chatbot Icon -->
+<!-- Chatbot Dialog -->
+<!-- Add this BEFORE the chatbot dialog, right after the Footer -->
+<!-- Chatbot Icon -->
+<div id="chatbot" onclick="toggleChat()">
+    <i class="fas fa-comments"></i>
+</div>
+
+<!-- Chatbot Dialog (keep this as is) -->
+<div id="chatbot-dialog">
+    <div id="chatbot-header">
+        <span>Assistant</span>
+        <i class="fas fa-times" onclick="toggleChat()"></i>
+    </div>
+    <div id="chatbot-body">
+        <div class="chat-msg bot-msg">Hello! How can I help you?</div>
+    </div>
+    <div id="chatbot-input-container">
+        <input id="chatbot-input" placeholder="Type a message..." />
+        <button id="chatbot-send"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+
+  <script>
+    // Toggle dialog
+    function toggleChat() {
+      const dlg = document.getElementById('chatbot-dialog');
+      dlg.style.display = (dlg.style.display==='flex' ? 'none' : 'flex');
+    }
+    // Chat logic
+    const bodyEl = document.getElementById('chatbot-body'),
+          inputEl = document.getElementById('chatbot-input'),
+          sendEl  = document.getElementById('chatbot-send');
+    function append(msg,cls){
+      const d=document.createElement('div');
+      d.className='chat-msg '+cls;
+      d.textContent=msg;
+      bodyEl.append(d);
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+    }
+    sendEl.addEventListener('click',()=>{
+      const t=inputEl.value.trim();
+      if(!t) return;
+      append(t,'user-msg'); inputEl.value='';
+      setTimeout(()=>{
+        append('I\'m analyzing that for you…','bot-msg');
+      },300);
+      setTimeout(()=>{
+        append('Based on the data, focus on improving bill payments and cashflow.','bot-msg');
+      },1200);
+    });
+    inputEl.addEventListener('keypress',e=>{ if(e.key==='Enter') sendEl.click(); });
+  </script>
+  
+
     <script>
         let scoreChart, impactChart;
 
@@ -1003,6 +1168,7 @@
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
     </script>
 </body>
 </html>
