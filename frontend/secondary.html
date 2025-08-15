@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank of India - Rural Credit Assessment System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #ffffff;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #ff6b35;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+        }
+        
+        .logo-text h1 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .logo-text p {
+            color: #ff6b35;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #1e3c72;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff6b35;
+        }
+        
+        .card h2 {
+            color: #1e3c72;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff6b35;
+            display: flex;
+            align-items: center;
+            font-size: 1.4rem;
+        }
+        
+        .card h2 i {
+            margin-right: 12px;
+            color: #ff6b35;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            color: #1e3c72;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1e3c72;
+        }
+        
+        .form-section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .note {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            color: #1976d2;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .note i {
+            margin-right: 8px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px auto;
+            min-width: 200px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 60, 114, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #1e3c72;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .loading-steps {
+            margin-top: 20px;
+            text-align: left;
+            color: #666;
+        }
+        
+        .loading-step {
+            padding: 5px 0;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-step.active {
+            opacity: 1;
+            color: #ff6b35;
+            font-weight: 600;
+        }
+        
+        .loading-step i {
+            margin-right: 8px;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .data-fetched-section {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .data-fetched-section h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .data-fetched-section h3 i {
+            margin-right: 10px;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .data-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .data-item-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .data-item-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 280px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #ff6b35;
+        }
+        
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .score-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .score-sublabel {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .score-excellent { color: #2ecc71; }
+        .score-good { color: #f39c12; }
+        .score-fair { color: #e67e22; }
+        .score-poor { color: #e74c3c; }
+        
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .component-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #ff6b35;
+            text-align: center;
+        }
+        
+        .component-card h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        
+        .component-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ff6b35;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+        
+        .risk-factors {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 1px solid #ff6b35;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .risk-factors h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .risk-factors h3 i {
+            margin-right: 10px;
+            color: #ff6b35;
+        }
+        
+        .risk-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .risk-item {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
+            font-weight: 500;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            .score-display {
+                flex-direction: column;
+            }
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chart-container h3 i {
+            margin-right: 10px;
+            color: #ff6b35;
+        }
+        
+        .recommendation {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border: 1px solid #4caf50;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .recommendation h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .recommendation h3 i {
+            margin-right: 10px;
+        }
+        
+        .footer {
+            background: #1e3c72;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <img src="your_logo.png" alt="Your Logo" style="width:150px; height:48px; border-radius:8px;">
+            <div class="logo">
+                <!-- Your logo placeholder - replace with actual logo -->
+                <!-- Bank of India emblem -->
+                <div style="width: 48px; height: 48px; background: #ff6b35; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-university" style="color: white; font-size: 22px;"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Bank of India</h1>
+                    <p>Rural Credit Assessment System</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <i class="fas fa-user-circle" style="font-size: 2rem;"></i>
+                <div>
+                    <strong>Branch Officer</strong>
+                    <br><small>Rural Banking Division</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Application Form -->
+        <div class="card" id="applicationForm">
+            <h2><i class="fas fa-user-plus"></i> New Credit Assessment Application</h2>
+            
+            <div class="note">
+                <i class="fas fa-info-circle"></i>
+                <strong>Note:</strong> Only basic applicant details are required. All financial data (DBT schemes, bill payments, AEPS/UPI transactions, and cash flow) will be automatically fetched from Bank of India's integrated systems.
+            </div>
+            
+            <form id="creditForm">
+                <div class="form-section">
+                    <h3>Applicant Details</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="applicantName">Full Name *</label>
+                            <input type="text" id="applicantName" name="applicantName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="aadhaarNumber">Aadhaar Number *</label>
+                            <input type="text" id="aadhaarNumber" name="aadhaarNumber" placeholder="XXXX XXXX XXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobileNumber">Mobile Number *</label>
+                            <input type="tel" id="mobileNumber" name="mobileNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">District/Location *</label>
+                            <select id="location" name="location" required>
+                                <option value="">Select Location</option>
+                                <option value="rajasthan">Rajasthan</option>
+                                <option value="uttarpradesh">Uttar Pradesh</option>
+                                <option value="bihar">Bihar</option>
+                                <option value="westbengal">West Bengal</option>
+                                <option value="maharashtra">Maharashtra</option>
+                                <option value="tamilnadu">Tamil Nadu</option>
+                                <option value="kerala">Kerala</option>
+                                <option value="punjab">Punjab</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="residenceYears">Years at Current Address</label>
+                            <input type="number" id="residenceYears" name="residenceYears" min="0" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="loanAmount">Requested Loan Amount (₹)</label>
+                            <input type="number" id="loanAmount" name="loanAmount" min="10000" max="500000" step="5000">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="assessBtn">
+                    <i class="fas fa-calculator"></i>
+                    Assess Credit Score
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Credit Assessment Results</h2>
+                
+                <!-- Data Fetched Section -->
+                <div class="data-fetched-section">
+                    <h3><i class="fas fa-database"></i> Automatically Fetched Financial Data</h3>
+                    <p style="color: #666; margin-bottom: 15px;">The following data was automatically retrieved from Bank of India's integrated systems:</p>
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <div class="data-item-label">DBT Payments</div>
+                            <div class="data-item-value" id="fetchedDBT">-</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-item-label">Bill Payment Ratio</div>
+                            <div class="data-item-value" id="fetchedBills">-</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-item-label">AEPS Transactions</div>
+                            <div class="data-item-value" id="fetchedAEPS">-</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-item-label">UPI Transactions</div>
+                            <div class="data-item-value" id="fetchedUPI">-</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-item-label">Cash Flow Ratio</div>
+                            <div class="data-item-value" id="fetchedCashFlow">-</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-item-label">Geo Stability</div>
+                            <div class="data-item-value" id="fetchedGeoStability">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="score-card">
+                        <div class="score-label">Credit Score</div>
+                        <div class="score-value" id="finalCreditScore">-</div>
+                        <div class="score-sublabel">300-900 Scale</div>
+                    </div>
+                    
+                    <div class="score-card">
+                        <div class="score-label">Risk Score</div>
+                        <div class="score-value" id="finalRiskScore">-</div>
+                        <div class="score-sublabel">Default Probability</div>
+                    </div>
+                    
+                    <div class="score-card">
+                        <div class="score-label">Recommendation</div>
+                        <div class="score-value" id="finalRecommendation" style="font-size: 1.8rem;">-</div>
+                        <div class="score-sublabel">Loan Decision</div>
+                    </div>
+                </div>
+
+                <div class="components-grid">
+                    <div class="component-card">
+                        <h4>DBT Frequency</h4>
+                        <div class="component-value" id="dbtScore">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress" id="dbtProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="component-card">
+                        <h4>Bill Payment Ratio</h4>
+                        <div class="component-value" id="billScore">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress" id="billProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="component-card">
+                        <h4>Digital Engagement</h4>
+                        <div class="component-value" id="digitalScore">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress" id="digitalProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="component-card">
+                        <h4>Cash Flow Ratio</h4>
+                        <div class="component-value" id="cashflowScore">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress" id="cashflowProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="risk-factors">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Key Risk Factors</h3>
+                    <ul class="risk-list" id="riskFactorsList">
+                    </ul>
+                </div>
+
+                <div class="recommendation" id="recommendationSection">
+                    <h3><i class="fas fa-thumbs-up"></i> Loan Recommendation</h3>
+                    <p id="recommendationText"></p>
+                </div>
+
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-pie"></i> Score Composition</h3>
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-bar"></i> Feature Impact Analysis</h3>
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="startNewAssessment()">
+                    <i class="fas fa-plus"></i>
+                    New Assessment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing Credit Assessment...</div>
+            <div class="loading-steps">
+                <div class="loading-step" id="step1"><i class="fas fa-search"></i> Fetching PFMS/DBT data...</div>
+                <div class="loading-step" id="step2"><i class="fas fa-file-invoice"></i> Analyzing BBPS payment history...</div>
+                <div class="loading-step" id="step3"><i class="fas fa-mobile-alt"></i> Processing AEPS & UPI transactions...</div>
+                <div class="loading-step" id="step4"><i class="fas fa-chart-line"></i> Accessing Account Aggregator data...</div>
+                <div class="loading-step" id="step5"><i class="fas fa-brain"></i> Running ML algorithms...</div>
+                <div class="loading-step" id="step6"><i class="fas fa-shield-alt"></i> Performing fairness audit...</div>
+                <div class="loading-step" id="step7"><i class="fas fa-check-circle"></i> Generating results...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Bank of India - Rural Credit Scoring System | Powered by Alternative Data & AI</p>
+        <p>© 2025 FINSHIELD Initiative | Empowering Rural India Through Financial Inclusion</p>
+    </div>
+
+    <script>
+        let scoreChart, impactChart;
+
+        // Form submission handler
+        document.getElementById('creditForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            processAssessment();
+        });
+
+        function processAssessment() {
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Simulate API calls with realistic delays
+            let currentStep = 0;
+            const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
+            
+            function activateNextStep() {
+                if (currentStep > 0) {
+                    document.getElementById(steps[currentStep - 1]).classList.remove('active');
+                }
+                if (currentStep < steps.length) {
+                    document.getElementById(steps[currentStep]).classList.add('active');
+                    currentStep++;
+                    
+                    // Variable delays for each step
+                    const delays = [1500, 2000, 1800, 2200, 3000, 1000, 800];
+                    setTimeout(activateNextStep, delays[currentStep - 1] || 1000);
+                } else {
+                    // All steps complete, show results
+                    setTimeout(showResults, 1000);
+                }
+            }
+            
+            activateNextStep();
+        }
+
+        function showResults() {
+            // Hide loading overlay
+            document.getElementById('loadingOverlay').style.display = 'none';
+            
+            // Generate realistic results based on form data
+            const formData = new FormData(document.getElementById('creditForm'));
+            const results = generateCreditResults(formData);
+            
+            // Display results
+            displayResults(results);
+            
+            // Hide form and show results
+            document.getElementById('applicationForm').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateCreditResults(formData) {
+            // Simulate fetched data (in real implementation, this would come from APIs)
+            const residenceYears = parseInt(formData.get('residenceYears')) || Math.floor(Math.random() * 20) + 1;
+            
+            // Simulate fetched data from various sources
+            const fetchedData = {
+                dbtPayments: Math.floor(Math.random() * 8) + 1,
+                billPaymentRatio: Math.floor(Math.random() * 40) + 60, // 60-100%
+                aepsTransactions: Math.floor(Math.random() * 50) + 10,
+                upiTransactions: Math.floor(Math.random() * 100) + 20,
+                cashFlowRatio: (Math.random() * 2 + 0.5).toFixed(2), // 0.5-2.5
+                geoStability: Math.min(100, residenceYears * 4 + Math.random() * 20)
+            };
+
+            // Calculate component scores based on fetched data
+            const dbtScore = Math.min(100, fetchedData.dbtPayments * 12 + Math.random() * 20);
+            const billScore = Math.min(100, fetchedData.billPaymentRatio + Math.random() * 15);
+            const digitalScore = Math.min(100, ((fetchedData.aepsTransactions + fetchedData.upiTransactions) / 1.5) + Math.random() * 25);
+            const cashflowScore = Math.min(100, Math.max(20, parseFloat(fetchedData.cashFlowRatio) * 40));
+            const geoScore = fetchedData.geoStability;
+
+            // Calculate overall credit score (weighted average)
+            const weightedScore = (dbtScore * 0.25 + billScore * 0.20 + digitalScore * 0.20 + cashflowScore * 0.20 + geoScore * 0.15);
+            const creditScore = Math.round(300 + (weightedScore / 100) * 600);
+            
+            // Calculate risk score
+            const riskScore = Math.max(5, 100 - weightedScore);
+            
+            // Generate recommendation
+            let recommendation = "APPROVED";
+            let recommendationClass = "score-excellent";
+            let recommendationText = "Applicant shows strong financial behavior across all alternative data sources. Recommended for loan approval with standard terms.";
+            
+            if (creditScore < 500) {
+                recommendation = "REJECTED";
+                recommendationClass = "score-poor";
+                recommendationText = "Applicant shows significant risk factors across multiple data sources. Loan application rejected. Consider financial counseling and literacy programs.";
+            } else if (creditScore < 650) {
+                recommendation = "REVIEW";
+                recommendationClass = "score-fair";
+                recommendationText = "Applicant shows moderate risk. Recommend manual review with additional documentation and consider offering smaller loan amount or higher interest rate.";
+            }
+
+            // Generate risk factors
+            const riskFactors = [];
+            if (digitalScore < 40) riskFactors.push("Limited digital banking engagement");
+            if (billScore < 60) riskFactors.push("Inconsistent utility bill payments");
+            if (dbtScore < 30) riskFactors.push("Low government scheme participation");
+            if (cashflowScore < 50) riskFactors.push("Negative cash flow patterns");
+            if (geoScore < 40) riskFactors.push("Low residential stability");
+
+            if (riskFactors.length === 0) {
+                riskFactors.push("No significant risk factors identified");
+            }
+
+            return {
+                fetchedData,
+                creditScore,
+                riskScore: riskScore.toFixed(1),
+                recommendation,
+                recommendationClass,
+                recommendationText,
+                components: {
+                    dbt: Math.round(dbtScore),
+                    bill: Math.round(billScore),
+                    digital: Math.round(digitalScore),
+                    cashflow: Math.round(cashflowScore),
+                    geo: Math.round(geoScore)
+                },
+                riskFactors
+            };
+        }
+
+        function displayResults(results) {
+            // Display fetched data
+            document.getElementById('fetchedDBT').textContent = results.fetchedData.dbtPayments + ' payments';
+            document.getElementById('fetchedBills').textContent = results.fetchedData.billPaymentRatio + '%';
+            document.getElementById('fetchedAEPS').textContent = results.fetchedData.aepsTransactions;
+            document.getElementById('fetchedUPI').textContent = results.fetchedData.upiTransactions;
+            document.getElementById('fetchedCashFlow').textContent = results.fetchedData.cashFlowRatio;
+            document.getElementById('fetchedGeoStability').textContent = results.fetchedData.geoStability.toFixed(0) + '%';
+            
+            // Display main scores
+            document.getElementById('finalCreditScore').textContent = results.creditScore;
+            document.getElementById('finalCreditScore').className = `score-value ${getScoreClass(results.creditScore)}`;
+            
+            document.getElementById('finalRiskScore').textContent = results.riskScore + '%';
+            
+            document.getElementById('finalRecommendation').textContent = results.recommendation;
+            document.getElementById('finalRecommendation').className = `score-value ${results.recommendationClass}`;
+            
+            // Display component scores
+            document.getElementById('dbtScore').textContent = results.components.dbt + '%';
+            document.getElementById('billScore').textContent = results.components.bill + '%';
+            document.getElementById('digitalScore').textContent = results.components.digital + '%';
+            document.getElementById('cashflowScore').textContent = results.components.cashflow + '%';
+            
+            // Update progress bars with animation
+            setTimeout(() => {
+                document.getElementById('dbtProgress').style.width = results.components.dbt + '%';
+                document.getElementById('billProgress').style.width = results.components.bill + '%';
+                document.getElementById('digitalProgress').style.width = results.components.digital + '%';
+                document.getElementById('cashflowProgress').style.width = results.components.cashflow + '%';
+            }, 500);
+            
+            // Display risk factors
+            const riskList = document.getElementById('riskFactorsList');
+            riskList.innerHTML = '';
+            results.riskFactors.forEach(factor => {
+                const li = document.createElement('li');
+                li.className = 'risk-item';
+                li.textContent = factor;
+                riskList.appendChild(li);
+            });
+            
+            // Update recommendation
+            document.getElementById('recommendationText').textContent = results.recommendationText;
+            
+            // Initialize charts
+            setTimeout(initializeCharts, 800);
+        }
+
+        function getScoreClass(score) {
+            if (score >= 750) return 'score-excellent';
+            if (score >= 650) return 'score-good';
+            if (score >= 550) return 'score-fair';
+            return 'score-poor';
+        }
+
+        function initializeCharts() {
+            const ctx1 = document.getElementById('scoreChart').getContext('2d');
+            const ctx2 = document.getElementById('impactChart').getContext('2d');
+            
+            // Pie chart for score composition
+            scoreChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['DBT Frequency (25%)', 'Bill Payment (20%)', 'Digital Engagement (20%)', 'Cash Flow (20%)', 'Geo Stability (15%)'],
+                    datasets: [{
+                        data: [25, 20, 20, 20, 15],
+                        backgroundColor: [
+                            '#ff6b35',
+                            '#f7931e', 
+                            '#1e3c72',
+                            '#2a5298',
+                            '#3498db'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Bar chart for feature impact
+            const components = [
+                parseInt(document.getElementById('dbtScore').textContent),
+                parseInt(document.getElementById('billScore').textContent),
+                parseInt(document.getElementById('digitalScore').textContent),
+                parseInt(document.getElementById('cashflowScore').textContent)
+            ];
+            
+            impactChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['DBT', 'Bills', 'Digital', 'Cash Flow'],
+                    datasets: [{
+                        label: 'Component Score',
+                        data: components,
+                        backgroundColor: ['#ff6b35', '#f7931e', '#1e3c72', '#2a5298']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Score (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function startNewAssessment() {
+            // Reset form
+            document.getElementById('creditForm').reset();
+            
+            // Reset loading steps
+            document.querySelectorAll('.loading-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show form, hide results
+            document.getElementById('applicationForm').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
