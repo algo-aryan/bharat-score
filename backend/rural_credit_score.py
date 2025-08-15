@@ -1,21 +1,15 @@
 """
-rural_credit_scorer_v2.py
+rural_credit_scorer.py
 
-Revised prototype for rural credit scoring (production-minded, demonstrative).
-- Fixes data leakage by using imblearn Pipeline and fitting transforms only on training data
+Prototype for rural credit scoring (production-minded, demonstrative).
+- Prevents data leakage by using imblearn Pipeline and fitting transforms only on training data
 - Adds evaluation metrics, calibration, and cross-validated analysis
 - Provides robust SHAP handling and per-applicant explanations
 - Adds simple fairness checks (statistical parity & equalized odds) on a protected attribute
-- Removes Aadhaar/PII use; uses 'residence_years' as a non-PII proxy (document and review legally)
+- Prevents Aadhaar/PII use; uses 'residence_years' as a non-PII proxy (document and review legally)
 - Adds model save/load, logging, and simple unit-like test checks in __main__
-- Designed for hackathon/demo but with explicit next steps documented in code comments.
-
-Dependencies:
-    numpy, pandas, scikit-learn, imbalanced-learn, xgboost, shap, joblib
-
-Author: Revised from user's original prototype
-Date: 2025-08-12 (example)
 """
+
 import inspect
 import os
 import math
@@ -46,7 +40,7 @@ import joblib
 # ----------------------------
 # Logging configuration
 # ----------------------------
-logger = logging.getLogger("RuralCreditScorerV2")
+logger = logging.getLogger("RuralCreditScorer")
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
@@ -73,11 +67,11 @@ def ensure_dir_exists(path: str):
 # ----------------------------
 # Main class
 # ----------------------------
-class RuralCreditScorerV2:
+class RuralCreditScorer:
     """
     A production-minded prototype for a rural credit scorer.
 
-    Main improvements vs. the earlier prototype:
+    Bonus features:
     - No scaler fit on full dataset (no data leakage). Uses an imbalanced-learn Pipeline (SMOTE -> Scaler -> Classifier).
     - Training split into Train / Calib / Test, model is calibrated on calibration set.
     - Comprehensive evaluation metrics (ROC AUC, PR AUC, Brier, Precision, Recall, F1).
@@ -171,7 +165,6 @@ class RuralCreditScorerV2:
         meta['region'] = rng.choice(regions, n_samples)
 
         # Construct a somewhat realistic default probability -- nonlinear mixing
-        # This is only for synthetic data creation.
         def_prob = (
             0.35 * (1 - X[:, 0] / 4) +                 # more DBT -> lower default
             0.25 * (1 - X[:, 1] / 100) +               # higher bill on-time -> lower default
@@ -181,7 +174,6 @@ class RuralCreditScorerV2:
         )
 
         # Introduce small region-based skew to simulate realistic disparities (for fairness testing).
-        # IMPORTANT: This skew is ONLY for testbed fairness measurement. Do NOT use region as a feature in the model.
         skew_map = {
             'Rajasthan': 0.0,
             'UP': 0.02,
@@ -193,10 +185,8 @@ class RuralCreditScorerV2:
         region_skew = np.array([skew_map[r] for r in meta['region']])
         def_prob = np.clip(def_prob + region_skew, 0.02, 0.95)
 
-        # Optional non-linear logistic-like transform to get probabilities
         def_prob = 1.0 / (1.0 + np.exp((def_prob - 0.5) * 6))
 
-        # Sample binary labels
         y = rng.binomial(1, def_prob)
 
         logger.debug(f"Synthetic data generated: X.shape={X.shape}, y.mean={y.mean():.3f}")
@@ -350,7 +340,6 @@ class RuralCreditScorerV2:
         metrics['f1'] = f1_score(y_true, y_pred, zero_division=0)
         metrics['brier'] = brier_score_loss(y_true, y_proba)
 
-        # Optionally compute confusion matrix
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
         metrics['tp'] = int(tp)
         metrics['fp'] = int(fp)
@@ -628,7 +617,7 @@ class RuralCreditScorerV2:
         self._init_shap_explainer()
 
     # ----------------------------
-    # Applicant data generation (demo / simulation)
+    # Applicant data generation 
     # ----------------------------
     def generate_applicant_data(self) -> Dict[str, Any]:
         """
@@ -727,15 +716,15 @@ class RuralCreditScorerV2:
 
 
 # ----------------------------
-# Minimal self-tests / demonstration
+# Minimal self-tests
 # ----------------------------
 def quick_demo():
     """
     Run a quick demonstration of initialization, simulation, and fairness audit.
     """
     logger.setLevel(logging.INFO)
-    logger.info("Starting quick demo of RuralCreditScorerV2...")
-    scorer = RuralCreditScorerV2(n_samples=3000, random_state=123)  # smaller for demo speed
+    logger.info("Starting quick demo of RuralCreditScorer...")
+    scorer = RuralCreditScorer(n_samples=3000, random_state=123)  
 
     # Run simulated applicants and print results
     sims = scorer.run_simulation(n_applicants=3)
@@ -770,7 +759,7 @@ if __name__ == "__main__":
 
     # Unit-like checks (basic)
     logger.info("Running basic checks...")
-    scorer = RuralCreditScorerV2(n_samples=1500, random_state=7)
+    scorer = RuralCreditScorer(n_samples=1500, random_state=7)
     # Generate single applicant and assert output structure
     sample = scorer.generate_applicant_data()
     out = scorer.predict(sample)
@@ -783,11 +772,3 @@ if __name__ == "__main__":
     assert 'statistical_parity_difference' in audit_res, "Fairness audit missing metrics"
 
     logger.info("All basic checks passed. Prototype initialized and functioning.")
-
-    # NOTE: Next production steps (not implemented in this prototype):
-    #  - Replace synthetic data with privacy-preserving real data (with consent), and retrain.
-    #  - Add rigorous cross-validation and hyperparameter tuning (e.g., with Optuna).
-    #  - Perform detailed fairness analysis across multiple sensitive attributes and multiple thresholds.
-    #  - Integrate model explainability and human-in-the-loop override workflows.
-    #  - Legal & privacy review before any PII or sensitive identifier is stored or used.
-    #  - Monitoring, logging, and alerting for model drift + re-training pipelines.
